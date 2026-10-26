@@ -1,6 +1,10 @@
+"use client"
 import Link from "next/link"
 import { Sun, House, MapPin, Search } from "lucide-react"
+import { usePathname } from "next/navigation"
+
 export default function AppSidebar() {
+    const pathname = usePathname()
     return (
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50/70 p-4 lg:flex">
             <Link
@@ -18,7 +22,7 @@ export default function AppSidebar() {
                 <Link
                     href="/"
                     aria-current="page"
-                    className="flex h-11 items-center gap-3 rounded-lg bg-emerald-50 px-3 text-sm font-medium text-emerald-800"
+                    className={`flex h-11 items-center gap-3 rounded-lg ${pathname == '/' ? "bg-emerald-50" : ""} px-3 text-sm font-medium text-emerald-800`}
                 >
                     <House className="size-5" />
                     Overview
@@ -26,7 +30,7 @@ export default function AppSidebar() {
 
                 <Link
                     href="/getbylocation"
-                    className="flex h-11 items-center gap-3 rounded-lg px-3 text-sm text-zinc-600 transition-colors hover:bg-zinc-100"
+                    className={`flex h-11 items-center gap-3 rounded-lg px-3 ${pathname == '/getbylocation' ? "bg-emerald-50" : ""}  text-sm text-zinc-600 transition-colors hover:bg-zinc-100`}
                 >
                     <Search className="size-5" />
                     Search cities
