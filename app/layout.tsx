@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Header from "@/components/Header";
 import StoreProvider from "./StoreProvider";
+import AppSidebar from "@/components/sidebar";
+import { Button } from "@/components/ui/button";
+import { Sun } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -36,8 +38,46 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <Header />
-        <StoreProvider>{children}</StoreProvider>
+        <div className="min-h-screen bg-white text-zinc-900">
+          <div className="flex">
+            <AppSidebar />
+            <div className="min-w-0 flex-1">
+              {/* <header className="flex h-16 items-center justify-between border-b border-zinc-200 px-5 lg:px-8" >
+                <div className="flex items-center gap-3 text-sm">
+                  <Sun className="size-5 text-emerald-500 lg:hidden" />
+                  <span className="text-zinc-500">Weather</span>
+                  <span className="text-zinc-300">/</span>
+                  <span>Overview</span>
+                </div>
+
+                <div
+                  role="group"
+                  aria-label="Temperature units"
+                  className="flex rounded-lg border border-zinc-200 p-1"
+                >
+                  {(["C", "F"] as const).map((value) => (
+                    <Button
+                      key={value}
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-pressed={unit === value}
+                      onClick={() => setUnit(value)}
+                      className={`h-7 px-3 ${unit === value
+                        ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        : "text-zinc-500"
+                        }`}
+                    >
+                      °{value}
+                    </Button>
+                  ))}
+                </div>
+              </header > */}
+              <StoreProvider>{children}</StoreProvider>
+            </div>
+          </div>
+        </div>
+
       </body>
     </html>
   );

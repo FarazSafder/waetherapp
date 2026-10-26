@@ -11,16 +11,17 @@ const getcitylatlong = axios.create({
   timeout: 5000,
 });
 
-export const getweatherapi = async (lat: number, lon: number) => {
+export const getweatherapi = async (lat: number, lon: number, signal?: AbortSignal) => {
   const response = await weatherClient.get<WeatherResponse>("", {
+    signal,
     params: {
       latitude: lat,
       longitude: lon,
       current:
-        "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature",
-      hourly: "temperature_2m",
-      daily: "weather_code,temperature_2m_max,temperature_2m_min",
-      forecast_days: 5,
+        "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature,wind_direction_10m,visibility",
+      hourly: "temperature_2m,rain,wind_speed_10m",
+      daily: "weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max",
+      forecast_days: 7,
       timezone: "auto",
     },
   });
@@ -28,8 +29,8 @@ export const getweatherapi = async (lat: number, lon: number) => {
   return response.data;
 };
 
-export const getcurrentlocation = async () => {
-  const response = await axios.get("https://ipwho.is/");
+export const getcurrentlocation = async (signal?: AbortSignal) => {
+  const response = await axios.get("https://ipwho.is/", { timeout: 5000, signal });
   const data = response.data;
 
   if (!data.success) {
@@ -39,6 +40,8 @@ export const getcurrentlocation = async () => {
   return {
     latitude: parseFloat(data.latitude),
     longitude: parseFloat(data.longitude),
+    name: data.city,
+    country: data.country,
   };
 }
 

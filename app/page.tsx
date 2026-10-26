@@ -1,54 +1,58 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import WeatherCard from "@/components/WeatherCard";
 import { getcurrentlocation, getweatherapi } from "@/services/weatherApi";
-import { getweather } from "@/redux/weatherSlice";
+import { getweather, setCurrentLocation } from "@/redux/weatherSlice";
 import type { AppDispatch, RootState } from "@/redux/store";
-import { Button } from "@/components/ui/button";
-import { clearweather } from "@/redux/weatherSlice"
+import HomePage from "@/components/Homepage";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
-  const weather = useSelector((state: RootState) => state.weather.temp);
-  const [loading, setLoading] = useState(false);
+  const { temp, currentLocation } = useSelector((state: RootState) => state.weather);
+  const [loading, setLoading] = useState(!temp);
   const [error, setError] = useState("");
-  const { temp } = useSelector((state: RootState) => state.weather);
+  const [attempt, setAttempt] = useState(0);
 
-  async function loadWeather() {
-    if (weather || loading) return;
+  useEffect(() => {
+    if (temp) return;
+    const controller = new AbortController();
 
-    setLoading(true);
-    setError("");
+    async function loadWeather() {
+      try {
+        const location = await getcurrentlocation(controller.signal);
+        const weather = await getweatherapi(location.latitude, location.longitude, controller.signal);
+        if (controller.signal.aborted) return;
 
-    try {
-      const { latitude, longitude } = await getcurrentlocation();
-      const data = await getweatherapi(latitude, longitude);
-      dispatch(getweather(data));
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Could not fetch weather. Please try again.",
-      );
-    } finally {
-      setLoading(false);
+        dispatch(setCurrentLocation({ city: location.name ?? "", country: location.country ?? "" }));
+        dispatch(getweather(weather));
+      } catch {
+        if (!controller.signal.aborted) {
+          setError("Could not load weather for your location. Please try again or search for a city.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
     }
+
+    void loadWeather();
+    return () => controller.abort();
+  }, [dispatch, temp, attempt]);
+
+  function retry() {
+    setError("");
+    setLoading(true);
+    setAttempt((value) => value + 1);
   }
+
   return (
-    <main className="text-center">
-
-      <div className="flex gap-2.5 justify-center">
-        <Button onClick={loadWeather} disabled={loading} variant="default">
-          Get weather for my location
-        </Button>
-        <Button onClick={() => dispatch(clearweather())} disabled={loading} variant="default">
-          clear State
-        </Button>
-      </div>
-
-      <Suspense fallback={<p>Loading city...</p>}><WeatherCard loading={loading} error={error} temp={temp} /></Suspense>
-    </main>
+    <HomePage
+      temp={temp}
+      loading={loading && !temp}
+      city={currentLocation?.city}
+      country={currentLocation?.country}
+      error={error}
+      onRetry={retry}
+    />
   );
 }

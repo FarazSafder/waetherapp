@@ -52,7 +52,7 @@ export default function SearchCity({
         />
         <Button
           type="submit"
-          className="absolute top-1/2 right-1.5 -translate-y-0.5 rounded-lg"
+          className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded-lg"
           disabled={loading || city.trim().length < 2}
         >
           {loading ? "Searching..." : "Search"}
